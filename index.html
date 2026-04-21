@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Arth Resorts · Crafting a Story of Forever</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Italiana&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ==============================================
+   ARTH RESORTS — INTERACTIVE WALKTHROUGH
+   ============================================== */
+
+:root {
+  /* surfaces */
+  --ivory: #F5EFE6;
+  --ivory-deep: #EDE4D5;
+  --cream: #EAE0D0;
+  --cream-soft: #F0E8DB;
+
+  /* brand */
+  --terracotta: #B55B39;
+  --terracotta-deep: #8B3F26;
+  --terracotta-soft: rgba(181, 91, 57, 0.08);
+  --terracotta-line: rgba(181, 91, 57, 0.35);
+
+  /* text */
+  --ink: #1A1310;
+  --espresso: #2A1F18;
+  --charcoal: #3D2F24;
+  --whisper: #6B5F52;
+
+  /* fonts */
+  --font-display: 'Cormorant Garamond', 'Georgia', serif;
+  --font-italiana: 'Italiana', 'Cormorant Garamond', serif;
+  --font-body: 'Jost', 'Helvetica Neue', sans-serif;
+
+  /* motion */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ivory);
+  color: var(--espresso);
+  font-family: var(--font-body);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* subtle paper grain */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.3;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.6  0 0 0 0 0.5  0 0 0 0 0.4  0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+img { max-width: 100%; display: block; }
+
+/* ==============================================
+   DECK CORE
+   ============================================== */
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 900ms var(--ease-out-quint),
+              visibility 0s linear 900ms;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 900ms var(--ease-out-quint),
+              visibility 0s linear 0s;
+}
+
+/* wrapper that handles centering when content fits,
+   and top-aligned scroll when content overflows */
+.slide-inner {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5vh 6vw 12vh;
+  box-sizing: border-box;
+}
+
+/* variant classes inherit to .slide-inner */
+.slide-cover       .slide-inner { align-items: center; text-align: center; }
+.slide-proposition .slide-inner { align-items: center; text-align: center; }
+.slide-strategy    .slide-inner { align-items: center; text-align: center; }
+.slide-act-divider .slide-inner { align-items: center; text-align: center; }
+.slide-promise     .slide-inner { align-items: center; text-align: center; }
+.slide-closing     .slide-inner { align-items: center; text-align: center; }
+
+/* staggered reveal */
+.slide .anim {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1200ms var(--ease-out-quint),
+              transform 1200ms var(--ease-out-quint);
+}
+.slide.active .anim { opacity: 1; transform: translateY(0); }
+.slide.active .anim[data-d="1"]  { transition-delay: 150ms; }
+.slide.active .anim[data-d="2"]  { transition-delay: 350ms; }
+.slide.active .anim[data-d="3"]  { transition-delay: 550ms; }
+.slide.active .anim[data-d="4"]  { transition-delay: 750ms; }
+.slide.active .anim[data-d="5"]  { transition-delay: 950ms; }
+.slide.active .anim[data-d="6"]  { transition-delay: 1150ms; }
+.slide.active .anim[data-d="7"]  { transition-delay: 1350ms; }
+.slide.active .anim[data-d="8"]  { transition-delay: 1550ms; }
+
+/* ==============================================
+   TYPOGRAPHY
+   ============================================== */
+.display-xxl {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(48px, 8vw, 120px);
+  line-height: 1.0;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.display-xl {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(38px, 4.8vw, 76px);
+  line-height: 1.08;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+}
+.display-lg {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(30px, 3.4vw, 54px);
+  line-height: 1.15;
+  color: var(--ink);
+}
+.display-md {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(22px, 2.4vw, 36px);
+  line-height: 1.25;
+  color: var(--ink);
+}
+.italic { font-style: italic; }
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  color: var(--terracotta);
+}
+.body-text {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: clamp(15px, 1.1vw, 17px);
+  line-height: 1.7;
+  color: var(--espresso);
+  max-width: 56ch;
+}
+.body-lg {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: clamp(17px, 1.3vw, 21px);
+  line-height: 1.55;
+  color: var(--espresso);
+  max-width: 54ch;
+}
+
+.dot-divider {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--terracotta);
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.dot-divider::before,
+.dot-divider::after {
+  content: '•';
+  font-size: 10px;
+  color: var(--terracotta);
+}
+
+/* ==============================================
+   SLIDE 1 — COVER
+   ============================================== */
+.slide-cover {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.cover-logo {
+  max-width: min(420px, 45vw);
+  height: auto;
+  margin-bottom: 40px;
+}
+.cover-tagline {
+  font-family: var(--font-body);
+  font-size: clamp(12px, 1vw, 15px);
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: var(--espresso);
+  font-weight: 500;
+  margin-top: 8px;
+}
+.cover-hint {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--whisper);
+  animation: pulse 2.8s ease-in-out infinite;
+  font-weight: 500;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.9; }
+}
+
+/* ==============================================
+   SLIDE 2 — PROPOSITION
+   ============================================== */
+.slide-proposition {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.proposition-body {
+  max-width: 32ch;
+  margin: 0 auto;
+  color: var(--ink);
+}
+.quote-mark {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 100px;
+  color: var(--terracotta);
+  line-height: 0;
+  display: block;
+  margin-bottom: 40px;
+}
+
+/* ==============================================
+   SLIDE 3 — STRATEGY LENS
+   ============================================== */
+.slide-strategy {
+  align-items: center;
+  text-align: center;
+}
+.strategy-header {
+  max-width: 1100px;
+  margin: 0 auto 80px;
+}
+.acts-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  margin: 40px 0;
+  width: 100%;
+  max-width: 1100px;
+}
+.act-orb {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+.orb {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 1px solid var(--terracotta);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 48px;
+  color: var(--terracotta);
+  background: var(--terracotta-soft);
+  transition: all 600ms var(--ease-out-quint);
+  font-weight: 400;
+}
+.orb-label {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--ink);
+  font-style: italic;
+}
+.act-connector {
+  width: 70px;
+  height: 1px;
+  background: var(--terracotta);
+  opacity: 0.5;
+  position: relative;
+}
+.act-connector::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 7px;
+  height: 7px;
+  border-right: 1px solid var(--terracotta);
+  border-top: 1px solid var(--terracotta);
+}
+
+/* ==============================================
+   ACT DIVIDERS
+   ============================================== */
+.slide-act-divider {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.act-number {
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.6em;
+  text-transform: uppercase;
+  color: var(--terracotta);
+  margin-bottom: 28px;
+  font-weight: 500;
+}
+.act-title {
+  font-family: var(--font-italiana);
+  font-size: clamp(60px, 9vw, 150px);
+  line-height: 0.95;
+  color: var(--ink);
+  letter-spacing: -0.015em;
+  margin-bottom: 32px;
+}
+.act-subtitle {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(22px, 2vw, 30px);
+  color: var(--terracotta-deep);
+  font-weight: 500;
+  margin-top: 8px;
+}
+.act-ornament {
+  width: 140px;
+  height: 1px;
+  background: var(--terracotta);
+  margin: 40px auto;
+  position: relative;
+}
+.act-ornament::before,
+.act-ornament::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  background: var(--terracotta);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+.act-ornament::before { left: -14px; }
+.act-ornament::after { right: -14px; }
+
+/* ==============================================
+   GENERIC HEADER
+   ============================================== */
+.slide-content { justify-content: center; }
+.slide-header {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 50px;
+  max-width: 900px;
+}
+
+/* ==============================================
+   SLIDE 5 — WHO IS ARTH FOR (editorial layout)
+   ============================================== */
+.personas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+.persona-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+.persona-row.reverse .persona-media { order: 2; }
+.persona-row.reverse .persona-text  { order: 1; text-align: right; }
+
+.persona-media {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--cream);
+  position: relative;
+}
+.persona-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 800ms var(--ease-out-quint);
+}
+.persona-row:hover .persona-media img { transform: scale(1.03); }
+
+.persona-text {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.persona-num {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 20px;
+  color: var(--terracotta);
+  letter-spacing: 0.15em;
+  font-weight: 500;
+}
+.persona-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(30px, 2.8vw, 44px);
+  color: var(--ink);
+  line-height: 1.15;
+}
+.persona-body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  color: var(--espresso);
+  line-height: 1.65;
+  max-width: 38ch;
+}
+.persona-row.reverse .persona-body { margin-left: auto; }
+
+/* ==============================================
+   SLIDE 6 — QUADRANT MATRIX
+   ============================================== */
+.quad-wrap {
+  width: 100%;
+  max-width: 1100px;
+  margin: 20px auto 0;
+  position: relative;
+}
+.quad-area {
+  position: relative;
+  height: 480px;
+  width: 100%;
+}
+/* center cross lines */
+.quad-area::before,
+.quad-area::after {
+  content: '';
+  position: absolute;
+  background: var(--terracotta);
+  opacity: 0.55;
+}
+.quad-area::before {
+  /* horizontal */
+  left: 0; right: 0;
+  top: 50%;
+  height: 1px;
+}
+.quad-area::after {
+  /* vertical */
+  top: 0; bottom: 0;
+  left: 50%;
+  width: 1px;
+}
+
+/* corner labels */
+.quad-label {
+  position: absolute;
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--terracotta-deep);
+  font-weight: 500;
+}
+.quad-label.tl { top: 0; left: 0; }
+.quad-label.tr { top: 0; right: 0; }
+.quad-label.bl { bottom: 0; left: 0; }
+.quad-label.br { bottom: 0; right: 0; }
+
+/* venue points */
+.quad-point {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: default;
+}
+.quad-point .q-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--terracotta);
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: transform 400ms var(--ease-out-quint);
+}
+.quad-point:hover .q-dot {
+  transform: scale(1.5);
+  background: var(--terracotta-deep);
+}
+.quad-point .q-label {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--espresso);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* ==============================================
+   SLIDE 7 & 8 — TWO COLUMN WITH MEDIA
+   ============================================== */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 80px;
+  align-items: center;
+  max-width: 1300px;
+  margin: 0 auto;
+  width: 100%;
+}
+.two-col-left  { display: flex; flex-direction: column; gap: 26px; }
+.two-col-right { display: flex; flex-direction: column; gap: 16px; }
+
+.media-frame {
+  aspect-ratio: 4 / 5;
+  background: var(--cream);
+  overflow: hidden;
+  position: relative;
+}
+.media-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.media-caption {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--whisper);
+  text-align: center;
+}
+
+/* ==============================================
+   SLIDE 8 — VENUE LIST
+   ============================================== */
+.venue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 20px;
+}
+.venue-list-item {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 40px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--terracotta-line);
+  align-items: baseline;
+}
+.venue-list-item:last-child { border-bottom: none; }
+.venue-list-label {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--terracotta-deep);
+  font-weight: 500;
+}
+.venue-list-value {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--espresso);
+}
+
+/* ==============================================
+   SLIDE 9 — THE PROMISE (DONUT, 3 SHADES)
+   ============================================== */
+.slide-promise {
+  align-items: center;
+  text-align: center;
+}
+.promise-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+  width: 100%;
+  max-width: 820px;
+  margin: 14px auto 0;
+}
+.promise-svg-wrap {
+  position: relative;
+  width: min(300px, 36vh);
+  height: min(300px, 36vh);
+}
+.promise-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.promise-segment {
+  stroke: var(--ivory);
+  stroke-width: 2;
+  transition: filter 400ms var(--ease-out-quint);
+  cursor: default;
+}
+.promise-segment:hover { filter: brightness(0.94); }
+.promise-center-circle {
+  fill: var(--ivory);
+  stroke: var(--terracotta);
+  stroke-width: 1;
+}
+.promise-center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+}
+.promise-center-text .eyebrow { font-size: 9px; }
+.promise-center-text .mark {
+  font-family: var(--font-italiana);
+  font-size: 20px;
+  color: var(--ink);
+}
+
+.promise-labels-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  width: 100%;
+  max-width: 720px;
+  margin-top: 8px;
+}
+
+.promise-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 260px;
+}
+.promise-label .roman {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--terracotta);
+  letter-spacing: 0.2em;
+  font-weight: 500;
+}
+.promise-label h3 {
+  font-family: var(--font-italiana);
+  font-size: clamp(22px, 2.2vw, 30px);
+  color: var(--ink);
+  font-weight: 400;
+  line-height: 1.05;
+}
+.promise-label p {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--espresso);
+  font-weight: 400;
+  line-height: 1.5;
+}
+.promise-label.one {
+  align-items: center;
+  text-align: center;
+  margin: 0 auto;
+}
+.promise-label.two {
+  align-items: flex-start;
+  text-align: left;
+  justify-self: end;
+}
+.promise-label.three {
+  align-items: flex-end;
+  text-align: right;
+  justify-self: start;
+}
+
+/* ==============================================
+   SLIDE 10 — BRAND CONCEPTS (editorial hero tiles)
+   ============================================== */
+.concepts-stage {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  max-width: 1300px;
+  width: 100%;
+  margin: 20px auto 0;
+}
+.concept-card {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 3 / 4.5;
+  background: var(--charcoal);
+  cursor: default;
+  transition: transform 600ms var(--ease-out-quint);
+}
+.concept-card:hover { transform: translateY(-6px); }
+.concept-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.78) saturate(1.05);
+  transition: transform 900ms var(--ease-out-quint), filter 500ms ease;
+}
+.concept-card:hover img { transform: scale(1.06); filter: brightness(0.68); }
+
+.concept-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 32px 28px;
+  color: var(--ivory);
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.1) 0%,
+    rgba(0,0,0,0) 30%,
+    rgba(0,0,0,0.2) 60%,
+    rgba(0,0,0,0.75) 100%
+  );
+}
+.concept-roman {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--ivory);
+  letter-spacing: 0.25em;
+  opacity: 0.9;
+}
+.concept-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.concept-meta .line {
+  width: 32px;
+  height: 1px;
+  background: var(--ivory);
+  opacity: 0.8;
+}
+.concept-name {
+  font-family: var(--font-italiana);
+  font-size: clamp(36px, 3.5vw, 56px);
+  color: var(--ivory);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+}
+.concept-hint {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--ivory);
+  opacity: 0.85;
+  max-width: 24ch;
+  line-height: 1.45;
+}
+
+/* ==============================================
+   SLIDE 12 — PRESENT TO CELEBRATE (TABS)
+   SLIDE 13 — PRESENT TO STAY
+   ============================================== */
+.tab-nav {
+  display: flex;
+  gap: 48px;
+  border-bottom: 1px solid var(--terracotta-line);
+  margin-bottom: 40px;
+  max-width: 1300px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.tab-btn {
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--whisper);
+  padding: 18px 4px;
+  cursor: pointer;
+  position: relative;
+  transition: color 300ms ease;
+  font-weight: 500;
+}
+.tab-btn:hover { color: var(--espresso); }
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--terracotta);
+  transition: width 500ms var(--ease-out-quint);
+}
+.tab-btn.active {
+  color: var(--terracotta-deep);
+}
+.tab-btn.active::after { width: 100%; }
+
+.tab-pane {
+  display: none;
+  animation: fadePane 700ms var(--ease-out-quint);
+  max-width: 1300px;
+  margin: 0 auto;
+  width: 100%;
+}
+.tab-pane.active { display: block; }
+@keyframes fadePane {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Film tab - 3 YouTube embeds */
+.film-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.film-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.film-wrap {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: var(--charcoal);
+}
+.film-wrap iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+.film-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.film-name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--ink);
+  font-weight: 500;
+}
+.film-meta {
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--whisper);
+  font-weight: 500;
+}
+
+/* Photography tab - auto-scrolling marquee */
+.photo-marquee {
+  width: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+.photo-track {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  animation: marquee 50s linear infinite;
+}
+.photo-marquee:hover .photo-track { animation-play-state: paused; }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.photo-item {
+  width: 320px;
+  height: 420px;
+  overflow: hidden;
+  background: var(--cream);
+  flex-shrink: 0;
+}
+.photo-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo-caption {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--whisper);
+  text-align: center;
+  margin-top: 28px;
+  font-weight: 500;
+}
+
+/* Brochures tab - 4-tile grid */
+.brochure-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.brochure-tile {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--cream);
+  transition: transform 500ms var(--ease-out-quint);
+}
+.brochure-tile:hover { transform: scale(1.02); }
+.brochure-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ==============================================
+   SLIDE 14 — LAUNCH EVENTS (3 IDEAS)
+   ============================================== */
+.launch-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  max-width: 1300px;
+  margin: 20px auto 0;
+}
+.launch-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.launch-media {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--cream);
+  position: relative;
+}
+.launch-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 800ms var(--ease-out-quint);
+}
+.launch-card:hover .launch-media img { transform: scale(1.04); }
+.launch-roman {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--terracotta);
+  letter-spacing: 0.2em;
+  font-weight: 500;
+}
+.launch-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--ink);
+  font-style: italic;
+  line-height: 1.2;
+}
+.launch-body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--espresso);
+}
+.launch-tags {
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--terracotta-deep);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* ==============================================
+   SLIDE 16 — RECEPTION PILLARS WITH ICONS
+   ============================================== */
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 50px;
+  margin-top: 40px;
+  max-width: 1200px;
+  width: 100%;
+}
+.pillar {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 40px 30px;
+  border: 1px solid var(--terracotta-line);
+  background: var(--cream-soft);
+  transition: all 500ms var(--ease-out-quint);
+}
+.pillar:hover {
+  border-color: var(--terracotta);
+  transform: translateY(-4px);
+}
+.pillar-icon {
+  width: 56px;
+  height: 56px;
+  color: var(--terracotta);
+}
+.pillar-icon svg { width: 100%; height: 100%; }
+.pillar-num {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--terracotta);
+  letter-spacing: 0.2em;
+  font-weight: 500;
+}
+.pillar-title {
+  font-family: var(--font-italiana);
+  font-size: clamp(28px, 2.6vw, 38px);
+  color: var(--ink);
+  line-height: 1;
+}
+.pillar-body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--espresso);
+}
+
+/* ==============================================
+   SLIDE 17 — COSTING (menu style)
+   ============================================== */
+.cost-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  margin-top: 32px;
+  max-width: 1200px;
+  width: 100%;
+}
+.cost-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 36px;
+}
+.cost-section:last-child { margin-bottom: 0; }
+.cost-section h4 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 26px;
+  color: var(--terracotta-deep);
+  font-weight: 500;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--terracotta-line);
+  margin-bottom: 4px;
+}
+.cost-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cost-item {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 14px;
+  color: var(--espresso);
+  padding: 4px 0;
+  line-height: 1.5;
+}
+.cost-item small {
+  color: var(--whisper);
+  font-size: 12px;
+  display: block;
+  margin-top: 1px;
+}
+.cost-total {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--terracotta-line);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.cost-total-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--terracotta-deep);
+  font-weight: 500;
+}
+.cost-total-value {
+  font-family: var(--font-italiana);
+  font-size: 28px;
+  color: var(--ink);
+}
+.cost-total-value small {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--whisper);
+  font-weight: 400;
+  margin-left: 6px;
+}
+
+/* ==============================================
+   SLIDE 18 — TNM CLOSING
+   ============================================== */
+.slide-closing {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.closing-quote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(30px, 3.6vw, 54px);
+  line-height: 1.3;
+  color: var(--ink);
+  max-width: 34ch;
+  letter-spacing: -0.005em;
+  margin: 0 auto;
+}
+
+/* ==============================================
+   CHROME / NAV
+   ============================================== */
+.nav-chrome {
+  position: fixed;
+  bottom: 28px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  z-index: 100;
+}
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--terracotta);
+  background: var(--ivory);
+  color: var(--terracotta);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 350ms var(--ease-out-quint);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
+}
+.nav-btn:hover {
+  background: var(--terracotta);
+  color: var(--ivory);
+  transform: scale(1.05);
+}
+.nav-counter {
+  font-family: var(--font-italiana);
+  font-size: 22px;
+  color: var(--ink);
+  min-width: 28px;
+  text-align: center;
+  font-weight: 400;
+}
+
+.section-label {
+  position: fixed;
+  top: 28px;
+  left: 40px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--terracotta-deep);
+  z-index: 100;
+  transition: opacity 400ms ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+}
+.section-label .bullet {
+  width: 4px;
+  height: 4px;
+  background: var(--terracotta);
+  border-radius: 50%;
+  transform: rotate(45deg);
+}
+.brand-mark {
+  position: fixed;
+  top: 28px;
+  right: 40px;
+  font-family: var(--font-italiana);
+  font-size: 22px;
+  color: var(--terracotta-deep);
+  z-index: 100;
+  letter-spacing: 0.05em;
+}
+.progress-track {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--terracotta-line);
+  z-index: 99;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--terracotta);
+  width: 0%;
+  transition: width 900ms var(--ease-out-quint);
+}
+
+/* ==============================================
+   RESPONSIVE
+   ============================================== */
+@media (max-width: 1024px) {
+  .slide { padding: 4vh 4vw; }
+  .two-col { grid-template-columns: 1fr; gap: 40px; }
+  .cost-grid { grid-template-columns: 1fr; gap: 40px; }
+  .pillars-grid, .concepts-stage, .film-grid, .launch-grid { grid-template-columns: 1fr; }
+  .persona-row { grid-template-columns: 1fr; gap: 20px; }
+  .persona-row.reverse .persona-media { order: 1; }
+  .persona-row.reverse .persona-text { order: 2; text-align: left; }
+  .brochure-grid { grid-template-columns: repeat(2, 1fr); }
+  .acts-row { flex-wrap: wrap; gap: 20px; }
+  .act-connector { width: 30px; }
+  .graph-area { height: 340px; }
+}
+</style>
+</head>
+<body>
+
+<!-- CHROME -->
+<div class="brand-mark">Arth</div>
+<div class="section-label" id="sectionLabel">
+  <span class="bullet"></span>
+  <span id="sectionText">The Opening</span>
+</div>
+
+<div class="nav-chrome">
+  <button class="nav-btn" id="prevBtn" aria-label="Previous">‹</button>
+  <div class="nav-counter" id="currentSlide">1</div>
+  <button class="nav-btn" id="nextBtn" aria-label="Next">›</button>
+</div>
+
+<div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+<!-- DECK -->
+<div class="deck" id="deck">
+
+  <!-- ============ 1 · COVER ============ -->
+  <section class="slide slide-cover active" data-section="The Opening">
+    <img class="cover-logo anim" data-d="1"
+         src="https://arthresorts.com/wp-content/uploads/2026/01/Arth_logo_resorts_img_new.png"
+         alt="Arth Resorts">
+    <div class="cover-tagline anim" data-d="3">Crafting a Story of Forever</div>
+  </section>
+
+  <!-- ============ 2 · PROPOSITION ============ -->
+  <section class="slide slide-proposition" data-section="The Opening">
+    <div class="anim" data-d="1"><span class="quote-mark">"</span></div>
+    <h2 class="display-xl italic proposition-body anim" data-d="2">
+      A destination for grand yet intimate celebrations — for people who actively seek luxury experiences.
+    </h2>
+    <div class="anim" data-d="4" style="margin-top: 48px;">
+      <span class="dot-divider">Arth Resorts</span>
+    </div>
+  </section>
+
+  <!-- ============ 3 · STRATEGY LENS ============ -->
+  <section class="slide slide-strategy" data-section="The Strategy Lens">
+    <div class="strategy-header anim" data-d="1">
+      <div class="eyebrow" style="margin-bottom: 28px;">The Strategy Lens</div>
+      <h2 class="display-lg" style="max-width: 28ch; margin: 0 auto; line-height: 1.25;">
+        To market a venue meant for celebrations, we borrow from the most layered celebration we know —
+        <span class="italic" style="color: var(--terracotta-deep);">The Great Indian Wedding.</span>
+      </h2>
+    </div>
+    <div class="acts-row">
+      <div class="act-orb anim" data-d="3">
+        <div class="orb">I</div>
+        <div class="orb-label">Match-making</div>
+      </div>
+      <div class="act-connector anim" data-d="4"></div>
+      <div class="act-orb anim" data-d="5">
+        <div class="orb">II</div>
+        <div class="orb-label">Wedding</div>
+      </div>
+      <div class="act-connector anim" data-d="6"></div>
+      <div class="act-orb anim" data-d="7">
+        <div class="orb">III</div>
+        <div class="orb-label">Reception</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4 · ACT I DIVIDER ============ -->
+  <section class="slide slide-act-divider" data-section="Act I · Match-making">
+    <div class="act-number anim" data-d="1">Act One</div>
+    <h2 class="act-title anim" data-d="2">Match-making</h2>
+    <div class="act-ornament anim" data-d="3"></div>
+    <p class="act-subtitle anim" data-d="4">Arriving with Grace</p>
+  </section>
+
+  <!-- ============ 5 · WHO IS ARTH FOR ============ -->
+  <section class="slide slide-content" data-section="Act I · Match-making">
+    <div class="slide-header" style="margin-bottom: 40px;">
+      <h2 class="display-xl anim" data-d="2">Who is <span class="italic">Arth</span> for?</h2>
+    </div>
+
+    <div class="personas-list">
+      <div class="persona-row anim" data-d="3">
+        <div class="persona-media">
+          <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=900&q=80"
+               alt="" loading="lazy"
+               onerror="this.src='https://picsum.photos/seed/arthwealth/900/1200'">
+        </div>
+        <div class="persona-text">
+          <div class="persona-num italic">i.</div>
+          <h3 class="persona-title italic">Wealthy to ultra-wealthy families</h3>
+          <p class="persona-body">For whom a celebration isn't a transaction — it's a declaration.</p>
+        </div>
+      </div>
+
+      <div class="persona-row reverse anim" data-d="4">
+        <div class="persona-media">
+          <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=900&q=80"
+               alt="" loading="lazy"
+               onerror="this.src='https://picsum.photos/seed/arthjetset/900/1200'">
+        </div>
+        <div class="persona-text">
+          <div class="persona-num italic">ii.</div>
+          <h3 class="persona-title italic">People with international lifestyles</h3>
+          <p class="persona-body">Who have already seen Bali, Dubai and the Maldives — and now want an answer closer to home.</p>
+        </div>
+      </div>
+
+      <div class="persona-row anim" data-d="5">
+        <div class="persona-media">
+          <img src="https://images.unsplash.com/photo-1600186203736-0bbff93ca8fd?auto=format&fit=crop&w=900&q=80"
+               alt="" loading="lazy"
+               onerror="this.src='https://picsum.photos/seed/arthroots/900/1200'">
+        </div>
+        <div class="persona-text">
+          <div class="persona-num italic">iii.</div>
+          <h3 class="persona-title italic">People with deep roots in AP &amp; Telangana</h3>
+          <p class="persona-body">Who want to celebrate here — where their people are, where their story started.</p>
+        </div>
+      </div>
+
+      <div class="persona-row reverse anim" data-d="6">
+        <div class="persona-media">
+          <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=900&q=80"
+               alt="" loading="lazy"
+               onerror="this.src='https://picsum.photos/seed/arthdestination/900/1200'">
+        </div>
+        <div class="persona-text">
+          <div class="persona-num italic">iv.</div>
+          <h3 class="persona-title italic">Those chasing a destination vibe, without the logistics</h3>
+          <p class="persona-body">A getaway without the flights, the visas, the 4-star compromises on the way.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6 · QUADRANT MATRIX ============ -->
+  <section class="slide slide-content" data-section="Act I · Match-making">
+    <div class="slide-header anim" data-d="1">
+      <h2 class="display-xl">Where do these people <span class="italic">convene to celebrate?</span></h2>
+    </div>
+
+    <div class="quad-wrap anim" data-d="2">
+      <div class="quad-area">
+        <!-- corner labels -->
+        <div class="quad-label tl">Experiential</div>
+        <div class="quad-label tr">In-City</div>
+        <div class="quad-label bl">Functional</div>
+        <div class="quad-label br">Destination</div>
+
+        <!-- venues (positioned per screenshot) -->
+        <div class="quad-point" style="left: 22%; top: 30%;">
+          <span class="q-dot"></span>
+          <span class="q-label">Taj Falaknuma</span>
+        </div>
+        <div class="quad-point" style="left: 34%; top: 42%;">
+          <span class="q-dot"></span>
+          <span class="q-label">HICC / Hitex</span>
+        </div>
+        <div class="quad-point" style="left: 62%; top: 26%;">
+          <span class="q-dot"></span>
+          <span class="q-label">ITC Kohenur</span>
+        </div>
+        <div class="quad-point" style="left: 74%; top: 36%;">
+          <span class="q-dot"></span>
+          <span class="q-label">Park Hyatt</span>
+        </div>
+
+        <div class="quad-point" style="left: 14%; top: 80%;">
+          <span class="q-dot"></span>
+          <span class="q-label">Ridhira</span>
+        </div>
+        <div class="quad-point" style="left: 28%; top: 72%;">
+          <span class="q-dot"></span>
+          <span class="q-label">Anvaya</span>
+        </div>
+        <div class="quad-point" style="left: 50%; top: 78%;">
+          <span class="q-dot"></span>
+          <span class="q-label">Golkonda</span>
+        </div>
+        <div class="quad-point" style="left: 66%; top: 62%;">
+          <span class="q-dot"></span>
+          <span class="q-label">Ramoji</span>
+        </div>
+        <div class="quad-point" style="left: 84%; top: 62%;">
+          <span class="q-dot"></span>
+          <span class="q-label">Bali · Dubai · Maldives</span>
+        </div>
+        <div class="quad-point" style="left: 84%; top: 74%;">
+          <span class="q-dot"></span>
+          <span class="q-label">Goa · Udaipur</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 7 · THE OPPORTUNITY ============ -->
+  <section class="slide slide-content" data-section="Act I · Match-making">
+    <div class="two-col">
+      <div class="two-col-left">
+        <div class="eyebrow anim" data-d="1">The Opportunity</div>
+        <h2 class="display-xl anim" data-d="2">
+          The one venue <span class="italic">Hyderabad</span> doesn't have.
+        </h2>
+        <p class="body-lg anim" data-d="3">
+          A resort-scale property — outside the city — with the polish and thought of a world-class event destination.
+        </p>
+        <p class="body-text anim" data-d="4">
+          When these families want that experience today, they fly to Udaipur, Jaipur, or Goa.
+          International options abound. Arth is positioned to be the first answer the region has to this desire.
+        </p>
+      </div>
+      <div class="two-col-right anim" data-d="3">
+        <div class="media-frame">
+          <img src="https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=1200&q=80"
+               alt="" loading="lazy"
+               onerror="this.src='https://picsum.photos/seed/arthopportunity/1000/1250'">
+        </div>
+        <p class="media-caption">Bali-inspired, in scale &amp; silence</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 8 · THE VENUE ============ -->
+  <section class="slide slide-content" data-section="Act I · Match-making">
+    <div class="two-col">
+      <div class="two-col-right anim" data-d="2">
+        <div class="media-frame">
+          <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80"
+               alt="" loading="lazy"
+               onerror="this.src='https://picsum.photos/seed/arthvenue/1000/1250'">
+        </div>
+        <p class="media-caption">A personality, not a product</p>
+      </div>
+      <div class="two-col-left">
+        <div class="eyebrow anim" data-d="1">The Venue</div>
+        <h2 class="display-xl anim" data-d="2">Beyond features. <br/><span class="italic">A personality.</span></h2>
+        <div class="venue-list">
+          <div class="venue-list-item anim" data-d="3">
+            <div class="venue-list-label">Architecture</div>
+            <div class="venue-list-value">Bali-inspired, grand in scale, rich in craftsmanship.</div>
+          </div>
+          <div class="venue-list-item anim" data-d="4">
+            <div class="venue-list-label">Key USPs</div>
+            <div class="venue-list-value">Convention capability with resort aesthetics. Location, location, location.</div>
+          </div>
+          <div class="venue-list-item anim" data-d="5">
+            <div class="venue-list-label">Emotional Hooks</div>
+            <div class="venue-list-value">Serenity · Escape · Grandeur.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 9 · THE PROMISE (DONUT) ============ -->
+  <section class="slide slide-promise" data-section="Act I · Match-making">
+    <div class="slide-header anim" data-d="1" style="text-align: center; margin: 0 auto 10px; align-items: center;">
+      <div class="eyebrow">The Promise</div>
+      <h2 class="display-lg">Clear, measurable <span class="italic">brand marketing objectives.</span></h2>
+    </div>
+
+    <div class="promise-layout anim" data-d="2">
+      <!-- top label -->
+      <div class="promise-label one">
+        <span class="roman">I.</span>
+        <h3>Stir Desire</h3>
+        <p>Establish Arth as Hyderabad's most coveted setting for landmark celebrations.</p>
+      </div>
+
+      <!-- donut -->
+      <div class="promise-svg-wrap">
+        <svg class="promise-svg" viewBox="0 0 400 400">
+          <g id="segments-real"></g>
+          <circle class="promise-center-circle" cx="200" cy="200" r="68" />
+        </svg>
+        <div class="promise-center-text">
+          <span class="eyebrow">Arth</span>
+          <span class="mark italic">The Promise</span>
+        </div>
+      </div>
+
+      <!-- bottom labels (grid: three on left, two on right) -->
+      <div class="promise-labels-bottom">
+        <div class="promise-label three">
+          <span class="roman">III.</span>
+          <h3>Build Momentum</h3>
+          <p>A year-round ecosystem of experiences that sustains cultural relevance.</p>
+        </div>
+        <div class="promise-label two">
+          <span class="roman">II.</span>
+          <h3>Evoke Belonging</h3>
+          <p>Portray spaces guests can immediately see themselves inside.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 10 · BRAND CONCEPTS ============ -->
+  <section class="slide slide-content" data-section="Act I · Match-making">
+    <div class="slide-header anim" data-d="1" style="text-align: center; margin: 0 auto 40px; align-items: center;">
+      <div class="eyebrow">Brand Storytelling</div>
+      <h2 class="display-xl">Three concepts. <span class="italic">One feeling.</span></h2>
+    </div>
+
+    <div class="concepts-stage">
+      <div class="concept-card anim" data-d="2">
+        <img src="https://images.unsplash.com/photo-1528458965990-428de4b1cb0c?auto=format&fit=crop&w=900&q=80"
+             alt="" loading="lazy"
+             onerror="this.src='https://picsum.photos/seed/arthmeaning/900/1350'">
+        <div class="concept-overlay">
+          <div class="concept-roman">I.</div>
+          <div class="concept-meta">
+            <div class="line"></div>
+            <h3 class="concept-name">Meaning</h3>
+            <p class="concept-hint">A wedding isn't just what you wear — it's what you want your life to stand for.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="concept-card anim" data-d="3">
+        <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=900&q=80"
+             alt="" loading="lazy"
+             onerror="this.src='https://picsum.photos/seed/arthcelebrate/900/1350'">
+        <div class="concept-overlay">
+          <div class="concept-roman">II.</div>
+          <div class="concept-meta">
+            <div class="line"></div>
+            <h3 class="concept-name">Celebration</h3>
+            <p class="concept-hint">Grand, textured, unrushed — a joy that deserves its own stage.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="concept-card anim" data-d="4">
+        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80"
+             alt="" loading="lazy"
+             onerror="this.src='https://picsum.photos/seed/arthtogether/900/1350'">
+        <div class="concept-overlay">
+          <div class="concept-roman">III.</div>
+          <div class="concept-meta">
+            <div class="line"></div>
+            <h3 class="concept-name">Best Together</h3>
+            <p class="concept-hint">The people you love, under one sky, far enough from everywhere else.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 11 · ACT II DIVIDER ============ -->
+  <section class="slide slide-act-divider" data-section="Act II · The Wedding">
+    <div class="act-number anim" data-d="1">Act Two</div>
+    <h2 class="act-title anim" data-d="2">The Wedding</h2>
+    <div class="act-ornament anim" data-d="3"></div>
+    <p class="act-subtitle anim" data-d="4">Arth announces itself to the world</p>
+  </section>
+
+  <!-- ============ 12 · PRESENT TO CELEBRATE (TABS) ============ -->
+  <section class="slide slide-content" data-section="Act II · The Wedding">
+    <div class="slide-header anim" data-d="1" style="text-align: center; margin: 0 auto 32px; align-items: center; max-width: 900px;">
+      <div class="eyebrow">Officiating the Union</div>
+      <h2 class="display-xl">Arth presents itself <span class="italic">to those who want to celebrate.</span></h2>
+    </div>
+
+    <div class="tab-container anim" data-d="2" id="tabs-celebrate">
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="film">Through Film</button>
+        <button class="tab-btn" data-tab="photos">Through Photography</button>
+        <button class="tab-btn" data-tab="brochures">Through Brochures</button>
+      </div>
+
+      <!-- FILM PANE -->
+      <div class="tab-pane active" data-pane="film">
+        <div class="film-grid">
+          <div class="film-card">
+            <div class="film-wrap">
+              <iframe src="https://www.youtube.com/embed/1UEGSWLqyV4"
+                      title="Ayatana film"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen></iframe>
+            </div>
+            <div class="film-label">
+              <span class="film-name italic">Ayatana</span>
+              <span class="film-meta">Reference</span>
+            </div>
+          </div>
+          <div class="film-card">
+            <div class="film-wrap">
+              <iframe src="https://www.youtube.com/embed/VdxFraxa_sA"
+                      title="Hyatt film"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen></iframe>
+            </div>
+            <div class="film-label">
+              <span class="film-name italic">Hyatt</span>
+              <span class="film-meta">Reference</span>
+            </div>
+          </div>
+          <div class="film-card">
+            <div class="film-wrap">
+              <iframe src="https://www.youtube.com/embed/8spO14gyNqo"
+                      title="Hilton film"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen></iframe>
+            </div>
+            <div class="film-label">
+              <span class="film-name italic">Hilton</span>
+              <span class="film-meta">Reference</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHOTOS PANE -->
+      <div class="tab-pane" data-pane="photos">
+        <div class="photo-marquee">
+          <div class="photo-track">
+            <!-- 10 images duplicated for seamless loop -->
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c1/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c2/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c3/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c4/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c5/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c6/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c7/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c8/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1529636798458-92182e662485?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c9/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1505236858219-8359eb29e329?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c10/700/900'"></div>
+            <!-- duplicate -->
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c1/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c2/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c3/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c4/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c5/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c6/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c7/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c8/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1529636798458-92182e662485?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c9/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1505236858219-8359eb29e329?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/c10/700/900'"></div>
+          </div>
+        </div>
+        <p class="photo-caption">Hover to pause · auto-scrolling gallery</p>
+      </div>
+
+      <!-- BROCHURES PANE -->
+      <div class="tab-pane" data-pane="brochures">
+        <div class="brochure-grid">
+          <div class="brochure-tile"><img src="https://images.unsplash.com/photo-1526243741027-444d633d7365?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/b1/700/900'"></div>
+          <div class="brochure-tile"><img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/b2/700/900'"></div>
+          <div class="brochure-tile"><img src="https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/b3/700/900'"></div>
+          <div class="brochure-tile"><img src="https://images.unsplash.com/photo-1516962126636-27ad087061cc?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/b4/700/900'"></div>
+        </div>
+        <p class="photo-caption">Coffee-table book · MICE deck · Corporate kit · Menu</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 13 · PRESENT TO STAY ============ -->
+  <section class="slide slide-content" data-section="Act II · The Wedding">
+    <div class="slide-header anim" data-d="1" style="text-align: center; margin: 0 auto 32px; align-items: center; max-width: 900px;">
+      <div class="eyebrow">Officiating the Union</div>
+      <h2 class="display-xl">Arth presents itself <span class="italic">to those who want to stay.</span></h2>
+    </div>
+
+    <div class="tab-container anim" data-d="2" id="tabs-stay">
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="stayphotos">Through Photography</button>
+        <button class="tab-btn" data-tab="staycollateral">Through Collateral</button>
+      </div>
+
+      <div class="tab-pane active" data-pane="stayphotos">
+        <div class="photo-marquee">
+          <div class="photo-track">
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s1/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s2/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s3/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1578898886225-c1c4e3abc717?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s4/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s5/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1534445538923-ab38438550d2?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s6/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1615460549969-36fa19521a4f?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s7/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1601128397472-cc85f98adfc6?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s8/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s9/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s10/700/900'"></div>
+            <!-- duplicate -->
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s1/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s2/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s3/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1578898886225-c1c4e3abc717?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s4/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s5/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1534445538923-ab38438550d2?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s6/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1615460549969-36fa19521a4f?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s7/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1601128397472-cc85f98adfc6?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s8/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s9/700/900'"></div>
+            <div class="photo-item"><img src="https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/s10/700/900'"></div>
+          </div>
+        </div>
+        <p class="photo-caption">Serenity · Escape · Grandeur — an Aman-style visual language</p>
+      </div>
+
+      <div class="tab-pane" data-pane="staycollateral">
+        <div class="brochure-grid">
+          <div class="brochure-tile"><img src="https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/sc1/700/900'"></div>
+          <div class="brochure-tile"><img src="https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/sc2/700/900'"></div>
+          <div class="brochure-tile"><img src="https://images.unsplash.com/photo-1571115764595-644a1f56a55c?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/sc3/700/900'"></div>
+          <div class="brochure-tile"><img src="https://images.unsplash.com/photo-1481833761820-0509d3217039?auto=format&fit=crop&w=700&q=80" alt="" loading="lazy" onerror="this.src='https://picsum.photos/seed/sc4/700/900'"></div>
+        </div>
+        <p class="photo-caption">In-room menus · Spa rituals · Dining collateral · Concierge kits</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 14 · LAUNCH EVENTS ============ -->
+  <section class="slide slide-content" data-section="Act II · The Wedding">
+    <div class="slide-header anim" data-d="1" style="text-align: center; margin: 0 auto 28px; align-items: center; max-width: 900px;">
+      <div class="eyebrow">The Launch</div>
+      <h2 class="display-xl"><span class="italic">Launch event concepts.</span></h2>
+    </div>
+
+    <div class="launch-grid">
+      <div class="launch-card anim" data-d="2">
+        <div class="launch-media">
+          <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80"
+               alt="" loading="lazy"
+               onerror="this.src='https://picsum.photos/seed/launch1/800/1000'">
+        </div>
+        <div class="launch-roman italic">I.</div>
+        <h3 class="launch-title">Wedding Showcase</h3>
+        <p class="launch-body">A curated reveal featuring the country's most sought-after designers, influencers, and fashion models — dressing Arth's spaces as they'd be lived in.</p>
+        <div class="launch-tags">Designers · Influencers · Models</div>
+      </div>
+
+      <div class="launch-card anim" data-d="3">
+        <div class="launch-media">
+          <img src="https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=800&q=80"
+               alt="" loading="lazy"
+               onerror="this.src='https://picsum.photos/seed/launch2/800/1000'">
+        </div>
+        <div class="launch-roman italic">II.</div>
+        <h3 class="launch-title">Escapade Weekends</h3>
+        <p class="launch-body">Invitation-only staycations with a tight circle of influencers — turning Arth into their story, told in their voice.</p>
+        <div class="launch-tags">Creators · Retreat · Storytelling</div>
+      </div>
+
+      <div class="launch-card anim" data-d="4">
+        <div class="launch-media">
+          <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80"
+               alt="" loading="lazy"
+               onerror="this.src='https://picsum.photos/seed/launch3/800/1000'">
+        </div>
+        <div class="launch-roman italic">III.</div>
+        <h3 class="launch-title">Supper Club — Indian Wedding Edit</h3>
+        <p class="launch-body">An intimate dining series hosted with celebrity chefs — Arth speaking at the scale of a table, not a ballroom.</p>
+        <div class="launch-tags">Chefs · Intimacy · Craft</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 15 · ACT III DIVIDER ============ -->
+  <section class="slide slide-act-divider" data-section="Act III · The Reception">
+    <div class="act-number anim" data-d="1">Act Three</div>
+    <h2 class="act-title anim" data-d="2">The Reception</h2>
+    <div class="act-ornament anim" data-d="3"></div>
+    <p class="act-subtitle anim" data-d="4">Taking the ceremony to the people</p>
+  </section>
+
+  <!-- ============ 16 · RECEPTION PILLARS (ICONS) ============ -->
+  <section class="slide slide-content" data-section="Act III · The Reception">
+    <div class="slide-header anim" data-d="1" style="text-align: center; margin: 0 auto 20px; align-items: center; max-width: 900px;">
+      <div class="eyebrow">The Reception</div>
+      <h2 class="display-xl">Audiences engage <span class="italic">with Arth's use-cases.</span></h2>
+    </div>
+
+    <div class="pillars-grid">
+      <div class="pillar anim" data-d="2">
+        <div class="pillar-icon">
+          <!-- Funnel icon (Activate) -->
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M6 8 L42 8 L30 24 L30 40 L18 40 L18 24 Z"/>
+            <line x1="12" y1="16" x2="36" y2="16"/>
+          </svg>
+        </div>
+        <div class="pillar-num italic">I.</div>
+        <h3 class="pillar-title italic">Activate</h3>
+        <p class="pillar-body">Sales funnels and lead-nurturing SOPs translate attention into booked celebrations.</p>
+      </div>
+
+      <div class="pillar anim" data-d="3">
+        <div class="pillar-icon">
+          <!-- Open book / continuing story icon (Continue) -->
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2">
+            <path d="M6 12 C12 10 18 10 24 14 C30 10 36 10 42 12 L42 38 C36 36 30 36 24 40 C18 36 12 36 6 38 Z"/>
+            <line x1="24" y1="14" x2="24" y2="40"/>
+            <line x1="12" y1="18" x2="20" y2="18"/>
+            <line x1="12" y1="24" x2="20" y2="24"/>
+            <line x1="28" y1="18" x2="36" y2="18"/>
+            <line x1="28" y1="24" x2="36" y2="24"/>
+          </svg>
+        </div>
+        <div class="pillar-num italic">II.</div>
+        <h3 class="pillar-title italic">Market</h3>
+        <p class="pillar-body">Storytelling and brand-building sustain the feeling long after the launch.</p>
+      </div>
+
+      <div class="pillar anim" data-d="4">
+        <div class="pillar-icon">
+          <!-- Compass / calendar icon (Strategise) -->
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.2">
+            <circle cx="24" cy="24" r="18"/>
+            <path d="M24 6 L24 42 M6 24 L42 24"/>
+            <path d="M24 14 L28 24 L24 34 L20 24 Z" fill="currentColor" fill-opacity="0.15"/>
+            <circle cx="24" cy="24" r="2" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="pillar-num italic">III.</div>
+        <h3 class="pillar-title italic">Strategise</h3>
+        <p class="pillar-body">A calendar of venue activations and experiential touch-points keeps Arth in the conversation.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 17 · COSTING ============ -->
+  <section class="slide slide-content" data-section="Investment">
+    <div class="cost-grid">
+      <!-- LEFT COLUMN -->
+      <div class="anim" data-d="2">
+        <div class="cost-section">
+          <h4>Media</h4>
+          <div class="cost-items">
+            <div class="cost-item">2–3 minute brand film</div>
+            <div class="cost-item">50 architecture photographs</div>
+            <div class="cost-item">20 lifestyle photographs</div>
+          </div>
+          <div class="cost-total">
+            <div class="cost-total-label">Total</div>
+            <div class="cost-total-value">₹ 65,00,000</div>
+          </div>
+        </div>
+
+        <div class="cost-section">
+          <h4>Pre-launch Collateral</h4>
+          <div class="cost-items">
+            <div class="cost-item">Brochures (2 × 16 pages)</div>
+            <div class="cost-item">40-page coffee-table book</div>
+            <div class="cost-item">Client email deck</div>
+            <div class="cost-item">Stationery</div>
+            <div class="cost-item">In-room menus &amp; IRD</div>
+            <div class="cost-item">Restaurant &amp; meeting collateral</div>
+            <div class="cost-item">Corporate sales kit &amp; gifting</div>
+          </div>
+          <div class="cost-total">
+            <div class="cost-total-label">Total</div>
+            <div class="cost-total-value">₹ 6,00,000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="anim" data-d="3">
+        <div class="cost-section">
+          <h4>Digital</h4>
+          <div class="cost-items">
+            <div class="cost-item">Website · Google Business Profile · Initial SEO</div>
+          </div>
+          <div class="cost-total">
+            <div class="cost-total-label">Total</div>
+            <div class="cost-total-value">₹ 2,50,000</div>
+          </div>
+        </div>
+
+        <div class="cost-section">
+          <h4>Pre-launch Campaign</h4>
+          <div class="cost-items">
+            <div class="cost-item">Brand storybuilding &amp; campaign concept</div>
+            <div class="cost-item">Teaser — hoardings &amp; digital (editorial tone)</div>
+            <div class="cost-item">Ad management &amp; operations</div>
+          </div>
+          <div class="cost-total">
+            <div class="cost-total-label">Total</div>
+            <div class="cost-total-value">₹ 2,50,000 <small>+ ad budget</small></div>
+          </div>
+        </div>
+
+        <div class="cost-section">
+          <h4>60-Day Launch Plan</h4>
+          <div class="cost-items">
+            <div class="cost-item">Launch event coordination</div>
+            <div class="cost-item">Social media management</div>
+            <div class="cost-item">Influencer engagement</div>
+            <div class="cost-item">Creative support</div>
+          </div>
+          <div class="cost-total">
+            <div class="cost-total-label">Total</div>
+            <div class="cost-total-value">₹ 3,50,000 <small>+ influencer / ad / event costs</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 18 · TNM CLOSING ============ -->
+  <section class="slide slide-closing" data-section="The TNM Journey">
+    <div class="anim" data-d="1" style="margin-bottom: 40px;">
+      <span class="dot-divider">The TNM Journey</span>
+    </div>
+    <h2 class="closing-quote anim" data-d="2">
+      From introductions to celebrations, we don't market Arth as just a venue — we orchestrate its story to <span style="color: var(--terracotta);">evoke enduring connection.</span>
+    </h2>
+  </section>
+
+</div>
+
+<script>
+/* ==============================================
+   Wrap each slide's content in .slide-inner
+   (provides robust "center when fits, scroll from top when overflows")
+   ============================================== */
+(function wrapSlides() {
+  document.querySelectorAll('.slide').forEach(slide => {
+    const inner = document.createElement('div');
+    inner.className = 'slide-inner';
+    const kids = Array.from(slide.childNodes);
+    kids.forEach(k => inner.appendChild(k));
+    slide.appendChild(inner);
+  });
+})();
+
+/* ==============================================
+   Build the Promise donut (3 wedges, 3 shades)
+   ============================================== */
+(function buildPromise() {
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.querySelector('.promise-svg');
+  if (!svg) return;
+
+  const CX = 200, CY = 200;
+  const R_OUTER = 170;
+  const R_INNER = 70;
+
+  // 3 equal wedges, starting at -90° (top), each 120°
+  const segments = [
+    { start: -90, end: 30,  fill: '#E8C5B0' }, // light terracotta (top — Stir Desire)
+    { start: 30,  end: 150, fill: '#C88A6B' }, // medium (bottom-right — Evoke Belonging)
+    { start: 150, end: 270, fill: '#A45940' }  // deep (bottom-left — Build Momentum)
+  ];
+
+  const toRad = d => (d * Math.PI) / 180;
+  const pointOn = (cx, cy, r, angleDeg) => ({
+    x: cx + r * Math.cos(toRad(angleDeg)),
+    y: cy + r * Math.sin(toRad(angleDeg))
+  });
+
+  const holder = svg.querySelector('#segments-real');
+
+  segments.forEach((s, i) => {
+    const p1 = pointOn(CX, CY, R_OUTER, s.start);
+    const p2 = pointOn(CX, CY, R_OUTER, s.end);
+    const p3 = pointOn(CX, CY, R_INNER, s.end);
+    const p4 = pointOn(CX, CY, R_INNER, s.start);
+
+    const largeArc = s.end - s.start > 180 ? 1 : 0;
+
+    const d = [
+      `M ${p1.x} ${p1.y}`,
+      `A ${R_OUTER} ${R_OUTER} 0 ${largeArc} 1 ${p2.x} ${p2.y}`,
+      `L ${p3.x} ${p3.y}`,
+      `A ${R_INNER} ${R_INNER} 0 ${largeArc} 0 ${p4.x} ${p4.y}`,
+      'Z'
+    ].join(' ');
+
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('class', 'promise-segment');
+    path.setAttribute('fill', s.fill);
+    path.dataset.seg = i;
+    holder.appendChild(path);
+  });
+})();
+
+/* ==============================================
+   TABS
+   ============================================== */
+document.querySelectorAll('.tab-container').forEach(container => {
+  const buttons = container.querySelectorAll('.tab-btn');
+  const panes = container.querySelectorAll('.tab-pane');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const target = btn.dataset.tab;
+      buttons.forEach(b => b.classList.remove('active'));
+      panes.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const pane = container.querySelector(`[data-pane="${target}"]`);
+      if (pane) pane.classList.add('active');
+    });
+  });
+});
+
+/* ==============================================
+   DECK NAVIGATION
+   ============================================== */
+(function () {
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const currentEl = document.getElementById('currentSlide');
+  const progressFill = document.getElementById('progressFill');
+  const sectionText = document.getElementById('sectionText');
+  const sectionLabel = document.getElementById('sectionLabel');
+
+  let current = 0;
+
+  function go(index) {
+    if (index < 0 || index >= total || index === current) return;
+    slides[current].classList.remove('active');
+    slides[index].classList.add('active');
+    current = index;
+    update();
+  }
+  function update() {
+    currentEl.textContent = current + 1;
+    progressFill.style.width = ((current + 1) / total * 100) + '%';
+    const section = slides[current].dataset.section || '';
+    sectionText.textContent = section;
+    if (current === 0) sectionLabel.style.opacity = '0';
+    else sectionLabel.style.opacity = '1';
+  }
+  function next() { go(Math.min(current + 1, total - 1)); }
+  function prev() { go(Math.max(current - 1, 0)); }
+
+  document.addEventListener('keydown', (e) => {
+    // don't hijack typing into iframes etc.
+    const tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+      e.preventDefault(); next();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault(); prev();
+    } else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(total - 1);
+  });
+
+  nextBtn.addEventListener('click', next);
+  prevBtn.addEventListener('click', prev);
+
+  update();
+})();
+</script>
+
+</body>
+</html>
